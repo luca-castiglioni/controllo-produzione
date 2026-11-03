@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Icona provvisoria (foglia stilizzata): sarà sostituita dal logo Castiglioni -->
+  <rect width="512" height="512" fill="#2e7d32"/>
+  <path d="M136 376c0-150 92-240 248-248-8 156-98 248-248 248z" fill="#ffffff"/>
+  <path d="M136 376l176-176" stroke="#2e7d32" stroke-width="18" stroke-linecap="round"/>
+</svg>
