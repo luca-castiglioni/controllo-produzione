@@ -16,3 +16,35 @@ export const PAGINE_SERVIZIO = [
 ] as const
 
 export type PaginaServizio = (typeof PAGINE_SERVIZIO)[number]['id']
+
+// Le due sezioni principali condividono elenco, modulo e dettaglio:
+// cambiano solo tabella, nomi dei campi ed etichette.
+export interface Registro {
+  tabella: 'test_incollaggio' | 'validazioni'
+  colonnaData: 'data' | 'giorno'
+  titolo: string
+  etichettaData: string
+  etichettaEsito: string
+  conNote: boolean
+}
+
+export const REGISTRO_TEST: Registro = {
+  tabella: 'test_incollaggio',
+  colonnaData: 'data',
+  titolo: 'Test colla',
+  etichettaData: 'Data',
+  etichettaEsito: 'Esito test',
+  conNote: true,
+}
+
+export const REGISTRO_VALIDAZIONI: Registro = {
+  tabella: 'validazioni',
+  colonnaData: 'giorno',
+  titolo: 'Validazione',
+  etichettaData: 'Giorno',
+  etichettaEsito: 'Validazione',
+  conNote: false,
+}
+
+// Quanti giorni mostra l'elenco all'apertura e a ogni "Carica altri"
+export const GIORNI_PER_PAGINA = 30

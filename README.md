@@ -52,6 +52,11 @@ npm run dev
 
 Apri `http://localhost:5173`. Dal telefono, sulla stessa Wi-Fi, usa l'indirizzo "Network" del terminale.
 
+Per provare la **fotocamera** dal telefono serve HTTPS: avvia con `npm run dev:https` e apri
+`https://<indirizzo Network>:5173`. Il telefono avvisa che il certificato non è sicuro (è un certificato
+di prova): scegli *Mostra dettagli → visita il sito* (iPhone) o *Avanzate → Procedi* (Android).
+L'app pubblicata su GitHub Pages è già in HTTPS.
+
 ## Operatori di prova (dal seed)
 
 | Nome | Telefono | Ruolo |

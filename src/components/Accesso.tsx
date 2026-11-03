@@ -89,7 +89,7 @@ export default function Accesso({ avviso }: { avviso?: string | null }) {
 
   return (
     <main className="schermata-centrale">
-      <img className="logo" src="./icon.svg" alt="" />
+      <img className="logo" src="./logo.png" alt="Castiglioni" />
       <h1>Controllo Produzione</h1>
 
       {passo === 'telefono' && (

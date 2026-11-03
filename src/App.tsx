@@ -4,7 +4,8 @@ import Accesso from './components/Accesso'
 import CambiaPassword from './components/CambiaPassword'
 import Icona from './components/Icone'
 import MenuLaterale from './components/MenuLaterale'
-import { PAGINE_SERVIZIO, type PaginaServizio } from './config'
+import SezioneRegistro from './components/SezioneRegistro'
+import { PAGINE_SERVIZIO, REGISTRO_TEST, REGISTRO_VALIDAZIONI, type PaginaServizio } from './config'
 import { caricaProfilo, supabase, supabaseConfigurato } from './supabase'
 import type { Operatore } from './types'
 
@@ -58,6 +59,7 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
   const [pagina, setPagina] = useState<PaginaServizio | null>(null)
   const [cambioPassword, setCambioPassword] = useState(false)
   const [messaggio, setMessaggio] = useState<string | null>(null)
+  const [versione, setVersione] = useState(0)
 
   useEffect(() => {
     if (!messaggio) return
@@ -66,11 +68,8 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
   }, [messaggio])
 
   const sezioneVisibile: Sezione = capo ? sezione : 'test'
-  const titolo = pagina
-    ? PAGINE_SERVIZIO.find((p) => p.id === pagina)!.titolo
-    : sezioneVisibile === 'test'
-      ? 'Test colla'
-      : 'Validazione'
+  const registro = sezioneVisibile === 'test' ? REGISTRO_TEST : REGISTRO_VALIDAZIONI
+  const titolo = pagina ? PAGINE_SERVIZIO.find((p) => p.id === pagina)!.titolo : registro.titolo
 
   return (
     <div className="app">
@@ -84,18 +83,25 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
             <Icona nome="menu" />
           </button>
         )}
-        <img className="logo-piccolo" src="./icon.svg" alt="" />
+        <img className="logo-piccolo" src="./logo.png" alt="Castiglioni" />
         <h1>{titolo}</h1>
+        <button className="icona-pulsante" onClick={() => setVersione(versione + 1)} aria-label="Aggiorna">
+          <Icona nome="aggiorna" />
+        </button>
       </header>
 
       <main className="contenuto">
-        <p className="vuoto">
-          {pagina
-            ? 'Pagina in arrivo nella fase 5.'
-            : sezioneVisibile === 'test'
-              ? 'Elenco dei test di incollaggio in arrivo nella fase 3.'
-              : 'Elenco delle validazioni in arrivo nella fase 4.'}
-        </p>
+        {pagina ? (
+          <p className="vuoto">Pagina in arrivo nella fase 5.</p>
+        ) : (
+          <SezioneRegistro
+            key={registro.tabella}
+            registro={registro}
+            profilo={profilo}
+            versione={versione}
+            onMessaggio={setMessaggio}
+          />
+        )}
       </main>
 
       {!pagina && (
@@ -154,7 +160,7 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
 function ErroreProfilo({ messaggio }: { messaggio: string }) {
   return (
     <main className="schermata-centrale">
-      <img className="logo" src="./icon.svg" alt="" />
+      <img className="logo" src="./logo.png" alt="Castiglioni" />
       <p className="errore riquadro">{messaggio}</p>
       <button className="pulsante" onClick={() => supabase.auth.signOut()}>
         Torna all'accesso
@@ -166,7 +172,7 @@ function ErroreProfilo({ messaggio }: { messaggio: string }) {
 function DaConfigurare() {
   return (
     <main className="schermata-centrale">
-      <img className="logo" src="./icon.svg" alt="" />
+      <img className="logo" src="./logo.png" alt="Castiglioni" />
       <h1>Controllo Produzione</h1>
       <div className="scheda testo">
         <p><strong>Manca il collegamento a Supabase.</strong></p>

@@ -14,7 +14,9 @@ La specifica completa è stata fornita nella prima conversazione; le regole chia
 
 ## Comandi
 - `npm run dev` — avvia in locale (raggiungibile dal telefono sulla stessa Wi-Fi)
+- `npm run dev:https` — come dev ma in HTTPS (certificato di prova): serve per la fotocamera dal telefono
 - `npm run build` — controllo dei tipi + build in `dist/`
+- `npm test` — test unitari (Vitest), es. `src/barcode.test.ts`
 - `npm run test:db` — applica migrazioni + seed su un Postgres in memoria (PGlite) e verifica i permessi
 - `supabase db push --remote` — applica le nuove migrazioni al progetto Supabase collegato
 - `supabase functions deploy <nome> --use-api` — pubblica una Edge Function (senza Docker)
@@ -33,7 +35,9 @@ La specifica completa è stata fornita nella prima conversazione; le regole chia
   operatori normali. Admin: tutto, unico a gestire capi reparto/admin e ruoli.
 - `operatore_id` e `ora` dei record li imposta il database (trigger), mai il client.
 - Telefono normalizzato: solo cifre, senza +39/0039 (`normalizza_telefono` in SQL; stessa regola nel client).
-- Barcode: togli `*`, poi primi 3 e ultimi 3 caratteri → commessa; < 7 caratteri = "Codice non valido".
+- Barcode: `parseBarcode` in `src/barcode.ts` — togli `*`, poi primi 3 e ultimi 3 caratteri → commessa;
+  < 7 caratteri = "Codice non valido". Scanner: @zxing/browser (Code 128, Code 39, QR), caricato solo all'uso.
+- Logo: `public/logo.png`; icone PWA = logo su fondo bianco (`public/icon.svg` → png con qlmanage).
 - Sempre almeno un admin attivo; nessuno cambia il proprio ruolo né si disattiva.
 - Export Excel solo per capo reparto e admin.
 - Interfaccia e nomi nel codice in italiano. Tema chiaro, verde primario, pulsanti grandi.
