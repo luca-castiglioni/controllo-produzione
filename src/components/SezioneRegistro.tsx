@@ -1,9 +1,18 @@
 import { useCallback, useEffect, useState } from 'react'
 import { GIORNI_PER_PAGINA, type Registro } from '../config'
 import { aggiungiGiorni, formatDataBreve, oggi } from '../format'
-import { puoInserire, puoModificare } from '../permessi'
-import { caricaImpianti, caricaRecord, eliminaRecord, messaggioErrore } from '../supabase'
+import { isCapo, puoInserire, puoModificare } from '../permessi'
+import { scaricaExcel } from '../export'
+import {
+  caricaImpianti,
+  caricaRecord,
+  eliminaRecord,
+  messaggioErrore,
+  NESSUN_FILTRO,
+  type Filtri,
+} from '../supabase'
 import type { Impianto, Operatore, RecordRegistro } from '../types'
+import BarraFiltri from './BarraFiltri'
 import Conferma from './Conferma'
 import DettaglioRecord from './DettaglioRecord'
 import ElencoRecord from './ElencoRecord'
@@ -14,11 +23,12 @@ interface Props {
   registro: Registro
   profilo: Operatore
   versione: number // cambia quando si preme "aggiorna" nella barra in alto
+  ricerca: boolean // barra di ricerca aperta (pulsante lente nella barra in alto)
   onMessaggio: (testo: string) => void
 }
 
 // Elenco + inserimento/modifica/eliminazione per test incollaggio o validazioni
-export default function SezioneRegistro({ registro, profilo, versione, onMessaggio }: Props) {
+export default function SezioneRegistro({ registro, profilo, versione, ricerca, onMessaggio }: Props) {
   const [giorni, setGiorni] = useState(GIORNI_PER_PAGINA)
   const [record, setRecord] = useState<RecordRegistro[]>([])
   const [impianti, setImpianti] = useState<Impianto[]>([])
@@ -28,13 +38,20 @@ export default function SezioneRegistro({ registro, profilo, versione, onMessagg
   const [dettaglio, setDettaglio] = useState<RecordRegistro | null>(null)
   const [daEliminare, setDaEliminare] = useState<RecordRegistro | null>(null)
   const [eliminazione, setEliminazione] = useState(false)
+  const [filtri, setFiltri] = useState<Filtri>(NESSUN_FILTRO)
+  const [esportazione, setEsportazione] = useState(false)
+
+  // chiudendo la ricerca si torna all'elenco completo
+  useEffect(() => {
+    if (!ricerca) setFiltri(NESSUN_FILTRO)
+  }, [ricerca])
 
   const dal = aggiungiGiorni(oggi(), -(giorni - 1))
 
   const ricarica = useCallback(async () => {
     setCaricamento(true)
     try {
-      const [r, i] = await Promise.all([caricaRecord(registro, dal), caricaImpianti()])
+      const [r, i] = await Promise.all([caricaRecord(registro, dal, filtri), caricaImpianti()])
       setRecord(r)
       setImpianti(i)
       setErrore(null)
@@ -43,7 +60,7 @@ export default function SezioneRegistro({ registro, profilo, versione, onMessagg
     } finally {
       setCaricamento(false)
     }
-  }, [registro, dal])
+  }, [registro, dal, filtri])
 
   useEffect(() => {
     ricarica()
@@ -65,19 +82,40 @@ export default function SezioneRegistro({ registro, profilo, versione, onMessagg
     }
   }
 
+  async function esporta() {
+    setEsportazione(true)
+    try {
+      await scaricaExcel(registro, record)
+    } catch (err) {
+      setErrore('Esportazione non riuscita: ' + (err as Error).message)
+    } finally {
+      setEsportazione(false)
+    }
+  }
+
   const modificabile = (r: RecordRegistro) => puoModificare(profilo, registro, r)
   const inserisce = puoInserire(profilo, registro)
+  const cercaCommessa = filtri.commessa.trim() !== ''
+  const filtrato = cercaCommessa || filtri.impianto !== '' || filtri.esito !== ''
 
   return (
     <>
+      {ricerca && <BarraFiltri filtri={filtri} impianti={impianti} onCambia={setFiltri} />}
       {errore && <p className="errore riquadro">{errore}</p>}
+      {cercaCommessa && !caricamento && (
+        <p className="nota-ricerca">
+          {record.length} risultati per «{filtri.commessa.trim()}» in tutto lo storico
+        </p>
+      )}
 
       {caricamento && record.length === 0 ? (
         <p className="vuoto">Caricamento…</p>
       ) : record.length === 0 ? (
         <p className="vuoto">
-          Nessun inserimento dal {formatDataBreve(dal)}.
-          {inserisce && (
+          {cercaCommessa
+            ? 'Nessun risultato.'
+            : `Nessun inserimento${filtrato ? ' con questi filtri' : ''} dal ${formatDataBreve(dal)}.`}
+          {inserisce && !filtrato && (
             <>
               <br />
               Tocca + per aggiungerne uno.
@@ -97,10 +135,19 @@ export default function SezioneRegistro({ registro, profilo, versione, onMessagg
 
       {!caricamento && (
         <div className="carica-altri">
-          <small>Dal {formatDataBreve(dal)}</small>
-          <button className="pulsante" onClick={() => setGiorni(giorni + GIORNI_PER_PAGINA)}>
-            Carica altri {GIORNI_PER_PAGINA} giorni
-          </button>
+          {!cercaCommessa && (
+            <>
+              <small>Dal {formatDataBreve(dal)}</small>
+              <button className="pulsante" onClick={() => setGiorni(giorni + GIORNI_PER_PAGINA)}>
+                Carica altri {GIORNI_PER_PAGINA} giorni
+              </button>
+            </>
+          )}
+          {isCapo(profilo) && record.length > 0 && (
+            <button className="pulsante" onClick={esporta} disabled={esportazione}>
+              {esportazione ? 'Preparazione…' : `Esporta in Excel (${record.length})`}
+            </button>
+          )}
         </div>
       )}
 

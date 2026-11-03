@@ -61,6 +61,7 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
   const [cambioPassword, setCambioPassword] = useState(false)
   const [messaggio, setMessaggio] = useState<string | null>(null)
   const [versione, setVersione] = useState(0)
+  const [ricerca, setRicerca] = useState(false)
 
   useEffect(() => {
     if (!messaggio) return
@@ -85,6 +86,15 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
         )}
         <img className="logo-piccolo" src="./logo.png" alt="Castiglioni" />
         <h1>{titolo}</h1>
+        {!pagina && (
+          <button
+            className={`icona-pulsante ${ricerca ? 'attivo' : ''}`}
+            onClick={() => setRicerca(!ricerca)}
+            aria-label="Cerca"
+          >
+            <Icona nome={ricerca ? 'chiudi' : 'cerca'} />
+          </button>
+        )}
         <button className="icona-pulsante" onClick={() => setVersione(versione + 1)} aria-label="Aggiorna">
           <Icona nome="aggiorna" />
         </button>
@@ -101,6 +111,7 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
             registro={registro}
             profilo={profilo}
             versione={versione}
+            ricerca={ricerca}
             onMessaggio={setMessaggio}
           />
         )}

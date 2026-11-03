@@ -164,12 +164,30 @@ function campiRecord(r: Registro): string {
     .join(', ')
 }
 
-// Record dalla data indicata in poi, dal più recente
-export async function caricaRecord(r: Registro, dal: string): Promise<RecordRegistro[]> {
-  const { data, error } = await supabase
-    .from(r.tabella)
-    .select(campiRecord(r))
-    .gte(r.colonnaData, dal)
+export interface Filtri {
+  commessa: string
+  impianto: string // '' = tutti
+  esito: '' | 'ok' | 'no' // '' = tutti
+}
+
+export const NESSUN_FILTRO: Filtri = { commessa: '', impianto: '', esito: '' }
+
+// Massimo di risultati per una ricerca su tutto lo storico
+const LIMITE_RICERCA = 500
+
+// Record dalla data indicata in poi, dal più recente.
+// Se si cerca una commessa, la ricerca vale su tutto lo storico.
+export async function caricaRecord(r: Registro, dal: string, filtri: Filtri = NESSUN_FILTRO): Promise<RecordRegistro[]> {
+  let query = supabase.from(r.tabella).select(campiRecord(r))
+  const commessa = filtri.commessa.trim()
+  if (commessa) {
+    query = query.ilike('commessa', `%${commessa.replace(/[\\%_]/g, '\\$&')}%`).limit(LIMITE_RICERCA)
+  } else {
+    query = query.gte(r.colonnaData, dal)
+  }
+  if (filtri.impianto) query = query.eq('impianto', filtri.impianto)
+  if (filtri.esito) query = query.eq('esito', filtri.esito === 'ok')
+  const { data, error } = await query
     .order(r.colonnaData, { ascending: false })
     .order('created_at', { ascending: false })
   if (error) throw error

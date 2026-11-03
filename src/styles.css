@@ -467,3 +467,20 @@ img.logo { display: block; width: auto; height: 96px; background: none; border-r
 .validazione-ok { background: #e8f5e9; color: var(--ok); }
 .validazione-no { background: #fdecea; color: var(--no); }
 .validazione-attesa { background: #fff4e5; color: #b45309; }
+
+/* ---------- Ricerca e filtri ---------- */
+.icona-pulsante.attivo { background: var(--sfondo); color: var(--primario); }
+.barra-filtri { padding: 12px; margin-bottom: 8px; gap: 10px; }
+.barra-filtri input[type='search'] { font-size: 18px; }
+.riga-filtri { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.scelta-filtro { display: flex; background: var(--bordo); border-radius: 10px; padding: 3px; }
+.scelta-filtro button {
+  border: none;
+  background: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  color: var(--testo-tenue);
+}
+.scelta-filtro button.attivo { background: var(--superficie); color: var(--testo); box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }
+.nota-ricerca { margin: 8px 4px; color: var(--testo-tenue); font-size: 14px; }

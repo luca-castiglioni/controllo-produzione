@@ -76,3 +76,34 @@ In Supabase → **SQL Editor**:
 update public.operatori set nome = 'Il tuo nome', telefono = '3351234567'
 where telefono = '3000000001';
 ```
+
+## Prima di usarla davvero: togliere i dati di prova
+
+Gli operatori di prova hanno telefoni fittizi: chi li conosce potrebbe creare la password al loro posto.
+In Supabase → **SQL Editor**, dopo aver messo il tuo numero da admin (sopra) e fatto il tuo primo accesso:
+
+```sql
+-- record di esempio
+delete from public.test_incollaggio;
+delete from public.validazioni;
+-- operatori di prova (il tuo admin resta, perché ha un telefono vero)
+delete from public.operatori where telefono like '300000000%' and auth_user_id is null;
+update public.operatori set attivo = false where telefono like '300000000%';
+```
+
+Gli operatori di prova che hanno già fatto l'accesso non si possono eliminare: vengono disattivati.
+
+## Pubblicazione (GitHub Pages)
+
+Il codice è su GitHub; a ogni modifica sul ramo `main` l'app si ripubblica da sola in circa un minuto
+(workflow `.github/workflows/deploy.yml`). URL e chiave publishable di Supabase sono salvati come
+**variabili** del repository (Settings → Secrets and variables → Actions → Variables).
+
+Indirizzo dell'app: `https://luca-castiglioni.github.io/controllo-produzione/`
+
+### Installare sul telefono
+
+- **Android (Chrome)**: apri l'indirizzo → menu ⋮ → **Installa app** (o "Aggiungi a schermata Home").
+- **iPhone (Safari)**: apri l'indirizzo → pulsante Condividi → **Aggiungi alla schermata Home**.
+
+Il primo accesso di ogni operatore va fatto alla consegna, davanti al capo reparto o all'admin.

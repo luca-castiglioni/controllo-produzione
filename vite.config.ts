@@ -8,6 +8,8 @@ import { version } from './package.json'
 export default defineConfig(({ mode }) => ({
   plugins: [react(), ...(mode === 'https' ? [basicSsl()] : [])],
   base: './',
+  // scanner ed Excel sono grandi ma si scaricano solo quando servono
+  build: { chunkSizeWarningLimit: 1000 },
   define: {
     __VERSIONE_APP__: JSON.stringify(version),
   },
