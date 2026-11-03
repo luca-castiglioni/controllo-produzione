@@ -17,7 +17,7 @@ La specifica completa è stata fornita nella prima conversazione; le regole chia
 - `npm run build` — controllo dei tipi + build in `dist/`
 - `npm run test:db` — applica migrazioni + seed su un Postgres in memoria (PGlite) e verifica i permessi
 - `supabase db push --remote` — applica le nuove migrazioni al progetto Supabase collegato
-- `supabase functions deploy <nome>` — pubblica una Edge Function
+- `supabase functions deploy <nome> --use-api` — pubblica una Edge Function (senza Docker)
 
 ## Struttura
 - `supabase/migrations/` — schema versionato (fonte di verità). Mai modificare una migrazione

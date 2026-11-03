@@ -29,6 +29,15 @@ Per le modifiche future allo schema basta `supabase db push --remote` (applica s
 
 Prova senza Supabase (database in memoria sul Mac): `npm run test:db`.
 
+### Edge Functions (primo accesso e reimposta accesso)
+
+```bash
+supabase functions deploy primo_accesso reimposta_accesso --use-api
+```
+
+Vanno ripubblicate solo quando cambia il codice in `supabase/functions/`.
+La chiave segreta la usano solo queste funzioni, sui server Supabase: non serve copiarla da nessuna parte.
+
 ## 3. Collegare l'app
 
 Copia `.env.example` in `.env.local` e inserisci **Project URL** e chiave **anon / publishable**

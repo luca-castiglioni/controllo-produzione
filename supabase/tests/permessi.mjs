@@ -125,5 +125,13 @@ verifica(!!x.e, 'operatore disattivato non inserisce')
 x = await fidato(`update operatori set attivo = false where id = $1`, [O(1)])
 verifica(x.e?.includes('almeno un amministratore'), 'deve restare almeno un admin attivo')
 
+// --- stato_accesso (chiamata senza login)
+await fidato(`insert into operatori (nome, telefono) values ('Mai entrato', '3335550000')`)
+const stato = async (t) => (await come(null, 'select stato_accesso($1) s', [t])).r?.rows[0].s
+verifica(await stato('+39 333 555 0000') === 'nuovo', 'stato_accesso: nuovo (telefono con +39 e spazi)')
+verifica(await stato('3000000003') === 'attivo', 'stato_accesso: attivo')
+verifica(await stato('3000000002') === 'disattivato', 'stato_accesso: disattivato')
+verifica(await stato('3999999999') === 'sconosciuto', 'stato_accesso: sconosciuto')
+
 console.log(`\n${ok} riuscite, ${ko} fallite`)
 process.exit(ko ? 1 : 0)
