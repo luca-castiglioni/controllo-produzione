@@ -144,8 +144,14 @@ export async function salvaOperatore(dati: DatiOperatore, id?: string) {
   if (!data.length) throw new Error('Non puoi modificare questo operatore.')
 }
 
-export async function eliminaOperatore(id: string) {
-  const { data, error } = await supabase.from('operatori').delete().eq('id', id).select('id')
+// Chi ha già fatto l'accesso lo elimina solo l'admin, tramite Edge Function
+// (va cancellato anche l'utente di Supabase Auth); gli altri direttamente.
+export async function eliminaOperatore(operatore: Operatore) {
+  if (operatore.auth_user_id) {
+    await chiamaFunzione('elimina_operatore', { operatore_id: operatore.id })
+    return
+  }
+  const { data, error } = await supabase.from('operatori').delete().eq('id', operatore.id).select('id')
   if (error) throw new Error(messaggioErrore(error, ERRORI_OPERATORE))
   if (!data.length) throw new Error('Non puoi eliminare questo operatore.')
 }

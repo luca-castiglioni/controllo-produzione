@@ -131,11 +131,13 @@ export default function ModuloOperatore({ operatore, io, onChiudi, onSalvato }: 
 
         {!nuovo && modificabile && !sonoIo && (
           <div className="azioni-secondarie">
-            {haAccesso ? (
+            {haAccesso && (
               <button type="button" className="pulsante" onClick={() => setConferma('reimposta')}>
                 Reimposta accesso (password dimenticata)
               </button>
-            ) : (
+            )}
+            {/* chi ha già fatto l'accesso lo elimina solo l'admin */}
+            {(!haAccesso || io.ruolo === 'admin') && (
               <button type="button" className="pulsante pericolo" onClick={() => setConferma('elimina')}>
                 Elimina operatore
               </button>
@@ -155,11 +157,15 @@ export default function ModuloOperatore({ operatore, io, onChiudi, onSalvato }: 
       )}
       {conferma === 'elimina' && (
         <Conferma
-          testo={`Eliminare ${operatore!.nome}?`}
+          testo={
+            haAccesso
+              ? `Eliminare ${operatore!.nome}? Perderà l'accesso all'app. Se ha già inserito dei record non sarà possibile: in quel caso disattivalo.`
+              : `Eliminare ${operatore!.nome}?`
+          }
           etichettaConferma="Elimina"
           attesa={attesa}
           onAnnulla={() => setConferma(null)}
-          onConferma={() => esegui(() => eliminaOperatore(operatore!.id), 'Operatore eliminato')}
+          onConferma={() => esegui(() => eliminaOperatore(operatore!), 'Operatore eliminato')}
         />
       )}
     </div>

@@ -29,10 +29,10 @@ Per le modifiche future allo schema basta `supabase db push --remote` (applica s
 
 Prova senza Supabase (database in memoria sul Mac): `npm run test:db`.
 
-### Edge Functions (primo accesso e reimposta accesso)
+### Edge Functions (primo accesso, reimposta accesso, elimina operatore)
 
 ```bash
-supabase functions deploy primo_accesso reimposta_accesso --use-api
+supabase functions deploy primo_accesso reimposta_accesso elimina_operatore --use-api
 ```
 
 Vanno ripubblicate solo quando cambia il codice in `supabase/functions/`.

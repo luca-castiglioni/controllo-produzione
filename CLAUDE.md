@@ -8,7 +8,7 @@ La specifica completa è stata fornita nella prima conversazione; le regole chia
 ## Stack
 - Vite + React 19 + TypeScript, CSS semplice in `src/styles.css` (come Casti Money, niente Tailwind)
 - Supabase: Auth (telefono → email fittizia `<telefono>@operatori.local` + password),
-  Postgres con Row Level Security, Edge Functions (primo accesso, reimposta accesso)
+  Postgres con Row Level Security, Edge Functions (primo accesso, reimposta accesso, elimina operatore)
 - Pubblicazione su GitHub Pages (`base: './'`), workflow in `.github/workflows/deploy.yml`
 - Progetto di riferimento: github.com/luca-castiglioni/casti-money
 
@@ -40,6 +40,9 @@ La specifica completa è stata fornita nella prima conversazione; le regole chia
   < 7 caratteri = "Codice non valido". Scanner: @zxing/browser (Code 128, Code 39, QR), caricato solo all'uso.
 - Logo: `public/logo.png`; icone PWA = logo su fondo bianco (`public/icon.svg` → png con qlmanage).
 - Sempre almeno un admin attivo; nessuno cambia il proprio ruolo né si disattiva.
+- Eliminazione operatori: chi ha inserito record non si elimina mai (si disattiva). Mai entrato:
+  capo reparto (solo operatori normali) o admin, direttamente. Già entrato: solo admin, tramite
+  Edge Function `elimina_operatore` (cancella anche l'utente Auth).
 - Export Excel solo per capo reparto e admin.
 - Interfaccia e nomi nel codice in italiano. Tema chiaro, verde primario, pulsanti grandi.
 
