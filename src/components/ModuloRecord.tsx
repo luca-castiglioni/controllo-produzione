@@ -5,6 +5,7 @@ import { oggi } from '../format'
 import { salvaRecord } from '../supabase'
 import type { Impianto, Operatore, RecordRegistro } from '../types'
 import Icona from './Icone'
+import StatoValidazione from './StatoValidazione'
 
 // la libreria di lettura codici è pesante: si scarica solo alla prima scansione
 const Scanner = lazy(() => import('./Scanner'))
@@ -118,6 +119,7 @@ export default function ModuloRecord({ registro, record, profilo, impianti, onCh
           </div>
           {barcode && <small className="nota-campo">Codice letto: {barcode}</small>}
           {erroreCodice && <small className="errore">{erroreCodice}</small>}
+          {registro.mostraValidazione && <StatoValidazione commessa={commessa} />}
         </div>
 
         <label>

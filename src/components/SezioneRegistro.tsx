@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { GIORNI_PER_PAGINA, type Registro } from '../config'
 import { aggiungiGiorni, formatDataBreve, oggi } from '../format'
-import { puoModificare } from '../permessi'
+import { puoInserire, puoModificare } from '../permessi'
 import { caricaImpianti, caricaRecord, eliminaRecord, messaggioErrore } from '../supabase'
 import type { Impianto, Operatore, RecordRegistro } from '../types'
 import Conferma from './Conferma'
@@ -65,7 +65,8 @@ export default function SezioneRegistro({ registro, profilo, versione, onMessagg
     }
   }
 
-  const modificabile = (r: RecordRegistro) => puoModificare(profilo, r)
+  const modificabile = (r: RecordRegistro) => puoModificare(profilo, registro, r)
+  const inserisce = puoInserire(profilo, registro)
 
   return (
     <>
@@ -76,8 +77,12 @@ export default function SezioneRegistro({ registro, profilo, versione, onMessagg
       ) : record.length === 0 ? (
         <p className="vuoto">
           Nessun inserimento dal {formatDataBreve(dal)}.
-          <br />
-          Tocca + per aggiungerne uno.
+          {inserisce && (
+            <>
+              <br />
+              Tocca + per aggiungerne uno.
+            </>
+          )}
         </p>
       ) : (
         <ElencoRecord
@@ -99,9 +104,11 @@ export default function SezioneRegistro({ registro, profilo, versione, onMessagg
         </div>
       )}
 
-      <button className="aggiungi" onClick={() => setModulo({})} aria-label="Nuovo inserimento">
-        <Icona nome="piu" dimensione={32} />
-      </button>
+      {inserisce && (
+        <button className="aggiungi" onClick={() => setModulo({})} aria-label="Nuovo inserimento">
+          <Icona nome="piu" dimensione={32} />
+        </button>
+      )}
 
       {dettaglio && (
         <DettaglioRecord

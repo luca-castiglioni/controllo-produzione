@@ -4,6 +4,8 @@ import Accesso from './components/Accesso'
 import CambiaPassword from './components/CambiaPassword'
 import Icona from './components/Icone'
 import MenuLaterale from './components/MenuLaterale'
+import PaginaImpianti from './components/PaginaImpianti'
+import PaginaOperatori from './components/PaginaOperatori'
 import SezioneRegistro from './components/SezioneRegistro'
 import { PAGINE_SERVIZIO, REGISTRO_TEST, REGISTRO_VALIDAZIONI, type PaginaServizio } from './config'
 import { caricaProfilo, supabase, supabaseConfigurato } from './supabase'
@@ -53,7 +55,6 @@ export default function App() {
 type Sezione = 'test' | 'validazione'
 
 function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
-  const capo = profilo.ruolo !== 'operatore'
   const [sezione, setSezione] = useState<Sezione>('test')
   const [menuAperto, setMenuAperto] = useState(false)
   const [pagina, setPagina] = useState<PaginaServizio | null>(null)
@@ -67,8 +68,7 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
     return () => clearTimeout(t)
   }, [messaggio])
 
-  const sezioneVisibile: Sezione = capo ? sezione : 'test'
-  const registro = sezioneVisibile === 'test' ? REGISTRO_TEST : REGISTRO_VALIDAZIONI
+  const registro = sezione === 'test' ? REGISTRO_TEST : REGISTRO_VALIDAZIONI
   const titolo = pagina ? PAGINE_SERVIZIO.find((p) => p.id === pagina)!.titolo : registro.titolo
 
   return (
@@ -91,8 +91,10 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
       </header>
 
       <main className="contenuto">
-        {pagina ? (
-          <p className="vuoto">Pagina in arrivo nella fase 5.</p>
+        {pagina === 'operatori' ? (
+          <PaginaOperatori io={profilo} versione={versione} onMessaggio={setMessaggio} />
+        ) : pagina === 'impianti' ? (
+          <PaginaImpianti versione={versione} onMessaggio={setMessaggio} />
         ) : (
           <SezioneRegistro
             key={registro.tabella}
@@ -106,22 +108,15 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
 
       {!pagina && (
         <nav className="schede-basso">
-          <button
-            className={sezioneVisibile === 'test' ? 'attiva' : ''}
-            onClick={() => setSezione('test')}
-          >
+          <button className={sezione === 'test' ? 'attiva' : ''} onClick={() => setSezione('test')}>
             <Icona nome="occhio" />
             TEST COLLA
           </button>
-          {capo && (
-            <button
-              className={sezioneVisibile === 'validazione' ? 'attiva' : ''}
-              onClick={() => setSezione('validazione')}
-            >
-              <Icona nome="pollice" />
-              VALIDAZIONE
-            </button>
-          )}
+          {/* gli operatori vedono le validazioni in sola lettura */}
+          <button className={sezione === 'validazione' ? 'attiva' : ''} onClick={() => setSezione('validazione')}>
+            <Icona nome="pollice" />
+            VALIDAZIONE
+          </button>
         </nav>
       )}
 

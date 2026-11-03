@@ -31,7 +31,8 @@ La specifica completa è stata fornita nella prima conversazione; le regole chia
 ## Regole di dominio
 - Ruoli: `operatore`, `capo_reparto`, `admin` (vedi commento in testa alla prima migrazione).
 - Operatore: vede/inserisce test; modifica/elimina i propri solo nel giorno di inserimento.
-  Niente validazioni (scheda nascosta). Capo reparto: tutto sui dati, gestisce impianti e
+  Vede le validazioni in sola lettura (scheda visibile, niente +); nel modulo test un avviso
+  sotto la commessa dice se è già validata. Capo reparto: tutto sui dati, gestisce impianti e
   operatori normali. Admin: tutto, unico a gestire capi reparto/admin e ruoli.
 - `operatore_id` e `ora` dei record li imposta il database (trigger), mai il client.
 - Telefono normalizzato: solo cifre, senza +39/0039 (`normalizza_telefono` in SQL; stessa regola nel client).

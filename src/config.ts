@@ -26,6 +26,8 @@ export interface Registro {
   etichettaData: string
   etichettaEsito: string
   conNote: boolean
+  scriveSoloCapo: boolean // gli operatori vedono ma non inseriscono/modificano
+  mostraValidazione: boolean // nel modulo, avvisa se la commessa è già validata
 }
 
 export const REGISTRO_TEST: Registro = {
@@ -35,6 +37,8 @@ export const REGISTRO_TEST: Registro = {
   etichettaData: 'Data',
   etichettaEsito: 'Esito test',
   conNote: true,
+  scriveSoloCapo: false,
+  mostraValidazione: true,
 }
 
 export const REGISTRO_VALIDAZIONI: Registro = {
@@ -44,6 +48,8 @@ export const REGISTRO_VALIDAZIONI: Registro = {
   etichettaData: 'Giorno',
   etichettaEsito: 'Validazione',
   conNote: false,
+  scriveSoloCapo: true,
+  mostraValidazione: false,
 }
 
 // Quanti giorni mostra l'elenco all'apertura e a ogni "Carica altri"

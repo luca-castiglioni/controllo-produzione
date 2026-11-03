@@ -426,3 +426,44 @@ img.logo { display: block; width: auto; height: 96px; background: none; border-r
   margin-bottom: 8px;
 }
 .scanner-comandi .pulsante { flex: 1; background: rgb(255 255 255 / 0.85); }
+
+/* ---------- Anagrafiche (operatori, impianti) ---------- */
+.elenco-semplice { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.riga-semplice {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  text-align: left;
+}
+.riga-semplice strong { font-size: 18px; }
+.stato {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  margin: 0;
+  align-self: flex-start;
+}
+.stato-attivo { background: #e8f5e9; color: var(--ok); }
+.stato-disattivato { background: #fdecea; color: var(--no); }
+.stato-in-attesa { background: #fff4e5; color: #b45309; }
+.modulo .spunta {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  font-size: 17px;
+  color: var(--testo);
+  font-weight: 500;
+}
+.modulo .spunta input { width: 26px; height: 26px; flex: none; accent-color: var(--primario); }
+.modulo select:disabled { background: var(--sfondo); color: var(--testo); opacity: 1; }
+.azioni-secondarie { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--bordo); }
+
+/* ---------- Stato validazione nel modulo test ---------- */
+.validazione { margin: 2px 0 0; padding: 8px 12px; border-radius: 10px; font-size: 15px; font-weight: 700; }
+.validazione-ok { background: #e8f5e9; color: var(--ok); }
+.validazione-no { background: #fdecea; color: var(--no); }
+.validazione-attesa { background: #fff4e5; color: #b45309; }

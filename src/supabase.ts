@@ -63,8 +63,12 @@ export async function caricaProfilo(authUserId: string): Promise<Operatore | nul
 
 // ---------- Messaggi di errore comprensibili ----------
 
-export function messaggioErrore(err: unknown): string {
+// "specifici": messaggi per codice di errore o nome del vincolo, validi solo in quel contesto
+export function messaggioErrore(err: unknown, specifici: Record<string, string> = {}): string {
   const e = err as { code?: string; message?: string }
+  for (const [chiave, testo] of Object.entries(specifici)) {
+    if (e.code === chiave || e.message?.includes(chiave)) return testo
+  }
   switch (e.code) {
     case '42501':
       return 'Non hai i permessi per questa operazione.'
@@ -72,6 +76,8 @@ export function messaggioErrore(err: unknown): string {
       return 'Il dato è usato altrove e non si può eliminare.'
     case '23505':
       return 'Esiste già un elemento con lo stesso valore.'
+    case '23514':
+      return 'Dati non validi.'
     case 'P0001':
       return e.message ?? 'Operazione non consentita.'
   }
@@ -85,6 +91,63 @@ export async function caricaImpianti(): Promise<Impianto[]> {
   const { data, error } = await supabase.from('impianti').select('*').order('codice')
   if (error) throw error
   return data as Impianto[]
+}
+
+const ERRORI_IMPIANTO = {
+  '23505': 'Esiste già un impianto con questo codice.',
+  '23503': 'Impianto usato in alcuni record: non si può eliminare, disattivalo.',
+  impianti_codice_obbligatorio: 'Il codice è obbligatorio.',
+}
+
+export async function salvaImpianto(impianto: Impianto, nuovo: boolean) {
+  const { error } = nuovo
+    ? await supabase.from('impianti').insert(impianto)
+    : await supabase
+        .from('impianti')
+        .update({ descrizione: impianto.descrizione, attivo: impianto.attivo })
+        .eq('codice', impianto.codice)
+  if (error) throw new Error(messaggioErrore(error, ERRORI_IMPIANTO))
+}
+
+export async function eliminaImpianto(codice: string) {
+  const { data, error } = await supabase.from('impianti').delete().eq('codice', codice).select('codice')
+  if (error) throw new Error(messaggioErrore(error, ERRORI_IMPIANTO))
+  if (!data.length) throw new Error('Non puoi eliminare questo impianto.')
+}
+
+// ---------- Operatori ----------
+
+const ERRORI_OPERATORE = {
+  '23505': 'Questo numero di telefono è già registrato.',
+  '23503': 'Questo operatore ha già inserito dei record: non si può eliminare, disattivalo.',
+  operatori_telefono_formato: 'Numero di telefono non valido (servono da 6 a 15 cifre).',
+  operatori_nome_obbligatorio: 'Il nome è obbligatorio.',
+}
+
+export async function caricaOperatori(): Promise<Operatore[]> {
+  const { data, error } = await supabase.from('operatori').select('*').order('nome')
+  if (error) throw error
+  return data as Operatore[]
+}
+
+export type DatiOperatore = Pick<Operatore, 'nome' | 'telefono' | 'ruolo' | 'attivo'>
+
+export async function salvaOperatore(dati: DatiOperatore, id?: string) {
+  const riga = { ...dati, telefono: normalizzaTelefono(dati.telefono) }
+  if (!id) {
+    const { error } = await supabase.from('operatori').insert(riga)
+    if (error) throw new Error(messaggioErrore(error, ERRORI_OPERATORE))
+    return
+  }
+  const { data, error } = await supabase.from('operatori').update(riga).eq('id', id).select('id')
+  if (error) throw new Error(messaggioErrore(error, ERRORI_OPERATORE))
+  if (!data.length) throw new Error('Non puoi modificare questo operatore.')
+}
+
+export async function eliminaOperatore(id: string) {
+  const { data, error } = await supabase.from('operatori').delete().eq('id', id).select('id')
+  if (error) throw new Error(messaggioErrore(error, ERRORI_OPERATORE))
+  if (!data.length) throw new Error('Non puoi eliminare questo operatore.')
 }
 
 // ---------- Test incollaggio e validazioni ----------
@@ -131,6 +194,26 @@ export async function salvaRecord(r: Registro, dati: DatiRecord, id?: string) {
   const { data, error } = await supabase.from(r.tabella).update(riga).eq('id', id).select('id')
   if (error) throw new Error(messaggioErrore(error))
   if (!data.length) throw new Error('Non puoi più modificare questo record.')
+}
+
+export interface UltimaValidazione {
+  giorno: string
+  impianto: string
+  esito: boolean
+}
+
+// Validazione più recente di una commessa (null se mai validata)
+export async function ultimaValidazione(commessa: string): Promise<UltimaValidazione | null> {
+  const { data, error } = await supabase
+    .from('validazioni')
+    .select('giorno, impianto, esito')
+    .eq('commessa', commessa.trim())
+    .order('giorno', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) throw error
+  return data as UltimaValidazione | null
 }
 
 export async function eliminaRecord(r: Registro, id: string) {
