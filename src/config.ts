@@ -26,6 +26,7 @@ export interface Registro {
   etichettaData: string
   etichettaEsito: string
   conNote: boolean
+  conControlloIncollaggio: boolean // spunta facoltativa "Controllo incollaggio"
   scriveSoloCapo: boolean // gli operatori vedono ma non inseriscono/modificano
   mostraValidazione: boolean // nel modulo, avvisa se la commessa è già validata
 }
@@ -37,6 +38,7 @@ export const REGISTRO_TEST: Registro = {
   etichettaData: 'Data',
   etichettaEsito: 'Esito test',
   conNote: true,
+  conControlloIncollaggio: false,
   scriveSoloCapo: false,
   mostraValidazione: true,
 }
@@ -48,6 +50,7 @@ export const REGISTRO_VALIDAZIONI: Registro = {
   etichettaData: 'Giorno',
   etichettaEsito: 'Validazione',
   conNote: false,
+  conControlloIncollaggio: true,
   scriveSoloCapo: true,
   mostraValidazione: false,
 }

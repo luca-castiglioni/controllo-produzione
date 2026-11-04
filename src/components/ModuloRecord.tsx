@@ -39,6 +39,7 @@ export default function ModuloRecord({ registro, record, profilo, impianti, onCh
   const [data, setData] = useState(record?.data ?? oggi())
   const [esito, setEsito] = useState<boolean | null>(record?.esito ?? null)
   const [note, setNote] = useState(record?.note ?? '')
+  const [controlloIncollaggio, setControlloIncollaggio] = useState(record?.controllo_incollaggio ?? false)
   const [errore, setErrore] = useState<string | null>(null)
   const [attesa, setAttesa] = useState(false)
   const [scansione, setScansione] = useState(false)
@@ -70,7 +71,7 @@ export default function ModuloRecord({ registro, record, profilo, impianti, onCh
     try {
       await salvaRecord(
         registro,
-        { commessa: commessa.trim(), barcode, impianto, data, esito, note: note.trim() || null },
+        { commessa: commessa.trim(), barcode, impianto, data, esito, note: note.trim() || null, controllo_incollaggio: controlloIncollaggio },
         record?.id,
       )
       try {
@@ -166,6 +167,17 @@ export default function ModuloRecord({ registro, record, profilo, impianti, onCh
             </button>
           </div>
         </div>
+
+        {registro.conControlloIncollaggio && (
+          <label className="spunta">
+            <input
+              type="checkbox"
+              checked={controlloIncollaggio}
+              onChange={(e) => setControlloIncollaggio(e.target.checked)}
+            />
+            Controllo incollaggio
+          </label>
+        )}
 
         {registro.conNote && (
           <label>

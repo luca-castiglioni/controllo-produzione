@@ -164,6 +164,7 @@ function campiRecord(r: Registro): string {
     `data:${r.colonnaData}`, // la colonna "giorno" delle validazioni arriva come "data"
     'ora, operatore_id, esito',
     r.conNote ? 'note' : null,
+    r.conControlloIncollaggio ? 'controllo_incollaggio' : null,
     'created_at, updated_at, operatore:operatori(nome)',
   ]
     .filter(Boolean)
@@ -208,6 +209,7 @@ export async function salvaRecord(r: Registro, dati: DatiRecord, id?: string) {
     [r.colonnaData]: dati.data,
     esito: dati.esito,
     ...(r.conNote ? { note: dati.note } : {}),
+    ...(r.conControlloIncollaggio ? { controllo_incollaggio: dati.controllo_incollaggio } : {}),
   }
   if (!id) {
     const { error } = await supabase.from(r.tabella).insert(riga)

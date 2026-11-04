@@ -484,3 +484,12 @@ img.logo { display: block; width: auto; height: 96px; background: none; border-r
 }
 .scelta-filtro button.attivo { background: var(--superficie); color: var(--testo); box-shadow: 0 1px 3px rgb(0 0 0 / 0.15); }
 .nota-ricerca { margin: 8px 4px; color: var(--testo-tenue); font-size: 14px; }
+.etichetta-flag {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e3f2fd;
+  color: #1565c0;
+  white-space: nowrap;
+}

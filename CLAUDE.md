@@ -44,6 +44,8 @@ La specifica completa è stata fornita nella prima conversazione; le regole chia
   capo reparto (solo operatori normali) o admin, direttamente. Già entrato: solo admin, tramite
   Edge Function `elimina_operatore` (cancella anche l'utente Auth).
 - Export Excel solo per capo reparto e admin.
+- Validazioni: spunta facoltativa `controllo_incollaggio` (default false), mostrata in elenco,
+  dettaglio ed Excel.
 - Interfaccia e nomi nel codice in italiano. Tema chiaro, verde primario, pulsanti grandi.
 
 ## Sicurezza

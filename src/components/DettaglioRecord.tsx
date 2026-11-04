@@ -25,6 +25,9 @@ export default function DettaglioRecord({ registro, record, modificabile, onChiu
       <span className={`esito ${record.esito ? 'ok' : 'no'}`}>{record.esito ? 'OK' : 'NO'}</span>,
     ],
   ]
+  if (registro.conControlloIncollaggio) {
+    righe.push(['Controllo incollaggio', record.controllo_incollaggio ? 'Sì' : 'No'])
+  }
   if (registro.conNote) righe.push(['Note', record.note || '—'])
   if (record.updated_at) righe.push(['Ultima modifica', formatDataOra(record.updated_at)])
 

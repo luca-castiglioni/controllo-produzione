@@ -37,6 +37,7 @@ export default function ElencoRecord({ record, conNote, puoModificare, onDettagl
                     </span>
                     <span className="riga-basso">
                       <span className={`esito ${r.esito ? 'ok' : 'no'}`}>{r.esito ? 'OK' : 'NO'}</span>
+                      {r.controllo_incollaggio && <span className="etichetta-flag">Controllo incollaggio</span>}
                       {conNote && r.note && <span className="note-breve">{r.note}</span>}
                     </span>
                     <small className="autore">{r.operatore?.nome}</small>

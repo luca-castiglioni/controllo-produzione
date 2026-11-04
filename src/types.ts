@@ -30,6 +30,7 @@ export interface RecordRegistro {
   operatore_id: string
   esito: boolean // true = OK
   note?: string | null // solo test incollaggio
+  controllo_incollaggio?: boolean // solo validazioni
   created_at: string
   updated_at: string | null
   operatore: { nome: string } | null
@@ -43,4 +44,5 @@ export interface DatiRecord {
   data: string
   esito: boolean
   note: string | null
+  controllo_incollaggio: boolean
 }
