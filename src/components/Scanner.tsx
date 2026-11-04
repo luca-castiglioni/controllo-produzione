@@ -23,6 +23,46 @@ const FORMATI_ZXING = [
 const LIVELLI_ZOOM = [1, 2, 3]
 const CHIAVE_FOTOCAMERA = 'fotocamera-scanner'
 
+// iPhone/iPad (anche gli iPad che si presentano come Mac)
+const IOS =
+  /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+
+// Su iPhone il permesso per la fotocamera spesso non viene ricordato tra una
+// richiesta e l'altra (soprattutto nell'app sulla schermata Home): dopo una
+// scansione il flusso resta aperto per un po' e la scansione successiva lo riusa.
+const MANTIENI_FLUSSO_MS = 2 * 60 * 1000
+let flussoPronto: { flusso: MediaStream; fotocamera: string | null; timer: ReturnType<typeof setTimeout> } | null =
+  null
+
+function spegni(flusso: MediaStream) {
+  flusso.getTracks().forEach((t) => t.stop())
+}
+
+// Riprende il flusso tenuto aperto, se è della stessa fotocamera ed è ancora attivo
+function riprendiFlusso(fotocamera: string | null): MediaStream | null {
+  if (!flussoPronto) return null
+  const { flusso, fotocamera: sua, timer } = flussoPronto
+  clearTimeout(timer)
+  flussoPronto = null
+  if (sua === fotocamera && flusso.active) return flusso
+  spegni(flusso)
+  return null
+}
+
+function rilasciaFlusso(flusso: MediaStream, fotocamera: string | null) {
+  if (!IOS) return spegni(flusso)
+  const precedente = riprendiFlusso(null)
+  if (precedente && precedente !== flusso) spegni(precedente)
+  flussoPronto = {
+    flusso,
+    fotocamera,
+    timer: setTimeout(() => {
+      spegni(flusso)
+      flussoPronto = null
+    }, MANTIENI_FLUSSO_MS),
+  }
+}
+
 // Funzioni del browser non ancora nei tipi standard di TypeScript
 type Capacita = MediaTrackCapabilities & { focusMode?: string[]; zoom?: { min: number; max: number } }
 interface RilevatoreNativo {
@@ -107,12 +147,13 @@ export default function Scanner({ onLetto, onChiudi }: Props) {
       setErrore("La fotocamera funziona solo se l'app è aperta con un indirizzo https://")
       return
     }
+    // senza nomi (iPhone, prima del permesso) si prova la fotocamera scelta in passato
     fotocamerePosteriori()
       .then((elenco) => {
         setFotocamere(elenco)
-        setFotocamera(fotocameraPreferita(elenco) ?? null)
+        setFotocamera(fotocameraPreferita(elenco) ?? leggiFotocameraScelta() ?? null)
       })
-      .catch(() => setFotocamera(null))
+      .catch(() => setFotocamera(leggiFotocameraScelta() ?? null))
   }, [])
 
   useEffect(() => {
@@ -135,7 +176,8 @@ export default function Scanner({ onLetto, onChiudi }: Props) {
       chiuso = true
       clearTimeout(prossimoTentativo)
       controlliZxing?.stop()
-      flusso?.getTracks().forEach((t) => t.stop())
+      if (flusso) rilasciaFlusso(flusso, fotocamera ?? null)
+      flusso = undefined
       traccia.current = null
     }
 
@@ -152,11 +194,19 @@ export default function Scanner({ onLetto, onChiudi }: Props) {
       if (capacita.focusMode?.includes('continuous')) {
         await t.applyConstraints({ advanced: [{ focusMode: 'continuous' } as MediaTrackConstraintSet] }).catch(() => {})
       }
+      if (capacita.zoom) {
+        // il flusso riusato potrebbe essere rimasto ingrandito
+        await t.applyConstraints({ advanced: [{ zoom: 1 } as MediaTrackConstraintSet] }).catch(() => {})
+      }
       setZoom(1)
       setZoomMassimo(capacita.zoom?.max ?? 1)
 
-      // primo utilizzo in assoluto: ora che c'è il permesso si può scegliere la principale
-      if (fotocamera === null) {
+      // primo utilizzo in assoluto: ora che c'è il permesso si può scegliere la principale.
+      // Non su iPhone: lì la posteriore scelta dal sistema va bene e riavviare la
+      // fotocamera farebbe chiedere di nuovo il permesso.
+      if (fotocamera === null && IOS) {
+        setFotocamere(await fotocamerePosteriori())
+      } else if (fotocamera === null) {
         const elenco = await fotocamerePosteriori()
         setFotocamere(elenco)
         const preferita = fotocameraPreferita(elenco)
@@ -165,23 +215,32 @@ export default function Scanner({ onLetto, onChiudi }: Props) {
     }
 
     async function avvia() {
-      try {
-        flusso = await navigator.mediaDevices.getUserMedia({
-          video: {
-            // alta risoluzione: le barre sottili si leggono meglio
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
-            ...(fotocamera ? { deviceId: { exact: fotocamera } } : { facingMode: { ideal: 'environment' } }),
-          },
-        })
-      } catch (err) {
-        if (!chiuso) setErrore(messaggioFotocamera(err))
-        return
+      const fc = fotocamera ?? null
+      let nuovo = riprendiFlusso(fc)
+      if (!nuovo) {
+        try {
+          nuovo = await navigator.mediaDevices.getUserMedia({
+            video: {
+              // alta risoluzione: le barre sottili si leggono meglio
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
+              ...(fc ? { deviceId: { exact: fc } } : { facingMode: { ideal: 'environment' } }),
+            },
+          })
+        } catch (err) {
+          if (chiuso) return
+          // fotocamera scelta in passato non più disponibile: si torna alla posteriore
+          const nome = (err as { name?: string }).name
+          if (fc && (nome === 'OverconstrainedError' || nome === 'NotFoundError')) setFotocamera(null)
+          else setErrore(messaggioFotocamera(err))
+          return
+        }
       }
       if (chiuso) {
-        flusso.getTracks().forEach((t) => t.stop()) // chiuso mentre la fotocamera si avviava
+        rilasciaFlusso(nuovo, fc) // chiuso mentre la fotocamera si avviava
         return
       }
+      flusso = nuovo
       video.srcObject = flusso
       await video.play().catch(() => {})
       await regolaFotocamera(flusso.getVideoTracks()[0])
