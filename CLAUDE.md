@@ -41,6 +41,9 @@ La specifica completa è stata fornita nella prima conversazione; le regole chia
 - Telefono normalizzato: solo cifre, senza +39/0039 (`normalizza_telefono` in SQL; stessa regola nel client).
 - Barcode: `parseBarcode` in `src/barcode.ts` — togli `*`, poi primi 3 e ultimi 3 caratteri → commessa;
   < 7 caratteri = "Codice non valido". Scanner: @zxing/browser (Code 128, Code 39, QR), caricato solo all'uso.
+- Scansione: Android = scanner dal vivo (`Scanner.tsx`, BarcodeDetector nativo + zxing di riserva).
+  iPhone = foto con la fotocamera di sistema (`<input capture>`) letta da `src/leggiFoto.ts`, perché
+  la fotocamera dal vivo su iPhone chiede il permesso a ogni utilizzo.
 - Logo: `public/logo.png`; icone PWA = logo su fondo bianco (`public/icon.svg` → png con qlmanage).
 - Sempre almeno un admin attivo; nessuno cambia il proprio ruolo né si disattiva.
 - Eliminazione operatori: chi ha inserito record non si elimina mai (si disattiva). Mai entrato:

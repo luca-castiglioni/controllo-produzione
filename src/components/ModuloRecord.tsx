@@ -1,6 +1,7 @@
-import { lazy, Suspense, useCallback, useState, type FormEvent } from 'react'
+import { lazy, Suspense, useCallback, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { parseBarcode } from '../barcode'
 import type { Registro } from '../config'
+import { IOS } from '../dispositivo'
 import { oggi } from '../format'
 import { salvaRecord } from '../supabase'
 import type { Impianto, Operatore, RecordRegistro } from '../types'
@@ -46,6 +47,8 @@ export default function ModuloRecord({ registro, record, profilo, impianti, onCh
   const [attesa, setAttesa] = useState(false)
   const [scansione, setScansione] = useState(false)
   const [erroreCodice, setErroreCodice] = useState<string | null>(null)
+  const [letturaFoto, setLetturaFoto] = useState(false)
+  const inputFoto = useRef<HTMLInputElement>(null)
 
   // codice letto dalla fotocamera: commessa ricavata con parseBarcode
   const codiceLetto = useCallback((testo: string) => {
@@ -60,6 +63,26 @@ export default function ModuloRecord({ registro, record, profilo, impianti, onCh
       setErroreCodice(`${r.errore} (${r.barcode || 'vuoto'}): inserisci la commessa a mano.`)
     }
   }, [])
+
+  // iPhone: invece della fotocamera dal vivo (che chiede ogni volta il permesso)
+  // si scatta una foto con la fotocamera di sistema e si legge il codice dalla foto
+  async function fotoScattata(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // permette di scegliere di nuovo la stessa foto
+    if (!file) return
+    setErroreCodice(null)
+    setLetturaFoto(true)
+    try {
+      const { leggiCodiceDaFoto } = await import('../leggiFoto')
+      const testo = await leggiCodiceDaFoto(file)
+      if (testo) codiceLetto(testo)
+      else setErroreCodice('Nessun codice trovato nella foto: riprova inquadrando bene l\'etichetta, oppure scrivi la commessa.')
+    } catch {
+      setErroreCodice('Impossibile leggere la foto: riprova oppure scrivi la commessa.')
+    } finally {
+      setLetturaFoto(false)
+    }
+  }
 
   // nel menu: impianti attivi + quello del record (anche se nel frattempo disattivato)
   const opzioni = impianti.filter((i) => i.attivo || i.codice === record?.impianto)
@@ -123,12 +146,17 @@ export default function ModuloRecord({ registro, record, profilo, impianti, onCh
             <button
               type="button"
               className="pulsante primario pulsante-scansione"
-              onClick={() => setScansione(true)}
+              onClick={() => (IOS ? inputFoto.current?.click() : setScansione(true))}
+              disabled={letturaFoto}
               aria-label="Leggi codice a barre"
             >
               <Icona nome="codice" dimensione={28} />
             </button>
           </div>
+          {IOS && (
+            <input ref={inputFoto} type="file" accept="image/*" capture="environment" hidden onChange={fotoScattata} />
+          )}
+          {letturaFoto && <small className="nota-campo">Lettura del codice dalla foto…</small>}
           {barcode && <small className="nota-campo">Codice letto: {barcode}</small>}
           {erroreCodice && <small className="errore">{erroreCodice}</small>}
           {registro.mostraValidazione && <StatoValidazione commessa={commessa} />}

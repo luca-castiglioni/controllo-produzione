@@ -1,31 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { BrowserMultiFormatReader, type IScannerControls } from '@zxing/browser'
-import { BarcodeFormat, DecodeHintType } from '@zxing/library'
+import { FORMATI_NATIVI, suggerimentiZxing } from '../codici'
+import { IOS } from '../dispositivo'
 
 interface Props {
   onLetto: (testo: string) => void
   onChiudi: () => void
 }
 
-// Formati accettati (Code 39: gli asterischi sulle etichette sono tipici di quel formato)
-const FORMATI_NATIVI = ['code_128', 'code_39', 'code_93', 'qr_code', 'data_matrix', 'itf', 'codabar', 'ean_13']
-const FORMATI_ZXING = [
-  BarcodeFormat.CODE_128,
-  BarcodeFormat.CODE_39,
-  BarcodeFormat.CODE_93,
-  BarcodeFormat.QR_CODE,
-  BarcodeFormat.DATA_MATRIX,
-  BarcodeFormat.ITF,
-  BarcodeFormat.CODABAR,
-  BarcodeFormat.EAN_13,
-]
-
 const LIVELLI_ZOOM = [1, 2, 3]
 const CHIAVE_FOTOCAMERA = 'fotocamera-scanner'
-
-// iPhone/iPad (anche gli iPad che si presentano come Mac)
-const IOS =
-  /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 
 // Su iPhone il permesso per la fotocamera spesso non viene ricordato tra una
 // richiesta e l'altra (soprattutto nell'app sulla schermata Home): dopo una
@@ -263,11 +247,7 @@ export default function Scanner({ onLetto, onChiudi }: Props) {
         return
       }
 
-      const suggerimenti = new Map<DecodeHintType, unknown>([
-        [DecodeHintType.POSSIBLE_FORMATS, FORMATI_ZXING],
-        [DecodeHintType.TRY_HARDER, true],
-      ])
-      controlliZxing = await new BrowserMultiFormatReader(suggerimenti).decodeFromVideoElement(
+      controlliZxing = await new BrowserMultiFormatReader(suggerimentiZxing()).decodeFromVideoElement(
         video,
         (risultato) => risultato && letto(risultato.getText()),
       )
