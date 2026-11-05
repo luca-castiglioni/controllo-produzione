@@ -25,18 +25,26 @@ export interface Registro {
   titolo: string
   etichettaData: string
   etichettaEsito: string
+  esitoComeSpunta: boolean // spunta (true = OK) invece dei due pulsanti NO / OK
+  etichettaBreveEsito: string // nelle etichette dell'elenco e nei filtri
+  conVerificaDimensionale: boolean // seconda spunta "Verifica dimensionale" (true = OK)
+  nomeFileExcel: string
   conNote: boolean
   conControlloIncollaggio: boolean // spunta facoltativa "Controllo incollaggio"
   scriveSoloCapo: boolean // gli operatori vedono ma non inseriscono/modificano
   mostraValidazione: boolean // nel modulo, avvisa se la commessa è già validata
 }
 
-export const REGISTRO_TEST: Registro = {
+export const REGISTRO_VERIFICA: Registro = {
   tabella: 'test_incollaggio',
   colonnaData: 'data',
-  titolo: 'Test colla',
+  titolo: 'Verifica',
   etichettaData: 'Data',
-  etichettaEsito: 'Esito test',
+  etichettaEsito: 'Test incollaggio',
+  esitoComeSpunta: true,
+  etichettaBreveEsito: 'Incollaggio',
+  conVerificaDimensionale: true,
+  nomeFileExcel: 'verifiche',
   conNote: true,
   conControlloIncollaggio: false,
   scriveSoloCapo: false,
@@ -49,6 +57,10 @@ export const REGISTRO_VALIDAZIONI: Registro = {
   titolo: 'Validazione',
   etichettaData: 'Giorno',
   etichettaEsito: 'Validazione',
+  esitoComeSpunta: false,
+  etichettaBreveEsito: 'Esito',
+  conVerificaDimensionale: false,
+  nomeFileExcel: 'validazioni',
   conNote: false,
   conControlloIncollaggio: true,
   scriveSoloCapo: true,

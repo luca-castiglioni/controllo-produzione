@@ -23,6 +23,7 @@ export async function scaricaExcel(registro: Registro, record: RecordRegistro[])
     { name: 'Codice letto', larghezza: 18 },
     { name: 'Impianto', larghezza: 10 },
     { name: registro.etichettaEsito, larghezza: 12 },
+    ...(registro.conVerificaDimensionale ? [{ name: 'Verifica dimensionale', larghezza: 20 }] : []),
     ...(registro.conControlloIncollaggio ? [{ name: 'Controllo incollaggio', larghezza: 20 }] : []),
     ...(registro.conNote ? [{ name: 'Note', larghezza: 40 }] : []),
     { name: 'Operatore', larghezza: 22 },
@@ -40,6 +41,7 @@ export async function scaricaExcel(registro: Registro, record: RecordRegistro[])
       r.barcode ?? '',
       r.impianto,
       r.esito ? 'OK' : 'NO',
+      ...(registro.conVerificaDimensionale ? [r.verifica_dimensionale ? 'OK' : 'NO'] : []),
       ...(registro.conControlloIncollaggio ? [r.controllo_incollaggio ? 'Sì' : 'No'] : []),
       ...(registro.conNote ? [r.note ?? ''] : []),
       r.operatore?.nome ?? '',
@@ -56,7 +58,7 @@ export async function scaricaExcel(registro: Registro, record: RecordRegistro[])
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${registro.tabella}-${oggi()}.xlsx`
+  a.download = `${registro.nomeFileExcel}-${oggi()}.xlsx`
   a.click()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }

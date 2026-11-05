@@ -165,6 +165,7 @@ function campiRecord(r: Registro): string {
     'ora, operatore_id, esito',
     r.conNote ? 'note' : null,
     r.conControlloIncollaggio ? 'controllo_incollaggio' : null,
+    r.conVerificaDimensionale ? 'verifica_dimensionale' : null,
     'created_at, updated_at, operatore:operatori(nome)',
   ]
     .filter(Boolean)
@@ -174,10 +175,11 @@ function campiRecord(r: Registro): string {
 export interface Filtri {
   commessa: string
   impianto: string // '' = tutti
-  esito: '' | 'ok' | 'no' // '' = tutti
+  esito: '' | 'ok' | 'no' // '' = tutti (nelle verifiche: test incollaggio)
+  dimensionale: '' | 'ok' | 'no' // solo verifiche
 }
 
-export const NESSUN_FILTRO: Filtri = { commessa: '', impianto: '', esito: '' }
+export const NESSUN_FILTRO: Filtri = { commessa: '', impianto: '', esito: '', dimensionale: '' }
 
 // Massimo di risultati per una ricerca su tutto lo storico
 const LIMITE_RICERCA = 500
@@ -194,6 +196,9 @@ export async function caricaRecord(r: Registro, dal: string, filtri: Filtri = NE
   }
   if (filtri.impianto) query = query.eq('impianto', filtri.impianto)
   if (filtri.esito) query = query.eq('esito', filtri.esito === 'ok')
+  if (filtri.dimensionale && r.conVerificaDimensionale) {
+    query = query.eq('verifica_dimensionale', filtri.dimensionale === 'ok')
+  }
   const { data, error } = await query
     .order(r.colonnaData, { ascending: false })
     .order('created_at', { ascending: false })
@@ -210,6 +215,7 @@ export async function salvaRecord(r: Registro, dati: DatiRecord, id?: string) {
     esito: dati.esito,
     ...(r.conNote ? { note: dati.note } : {}),
     ...(r.conControlloIncollaggio ? { controllo_incollaggio: dati.controllo_incollaggio } : {}),
+    ...(r.conVerificaDimensionale ? { verifica_dimensionale: dati.verifica_dimensionale } : {}),
   }
   if (!id) {
     const { error } = await supabase.from(r.tabella).insert(riga)

@@ -25,6 +25,14 @@ export default function DettaglioRecord({ registro, record, modificabile, onChiu
       <span className={`esito ${record.esito ? 'ok' : 'no'}`}>{record.esito ? 'OK' : 'NO'}</span>,
     ],
   ]
+  if (registro.conVerificaDimensionale) {
+    righe.push([
+      'Verifica dimensionale',
+      <span className={`esito ${record.verifica_dimensionale ? 'ok' : 'no'}`}>
+        {record.verifica_dimensionale ? 'OK' : 'NO'}
+      </span>,
+    ])
+  }
   if (registro.conControlloIncollaggio) {
     righe.push(['Controllo incollaggio', record.controllo_incollaggio ? 'Sì' : 'No'])
   }

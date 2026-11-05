@@ -96,11 +96,11 @@ export default function SezioneRegistro({ registro, profilo, versione, ricerca, 
   const modificabile = (r: RecordRegistro) => puoModificare(profilo, registro, r)
   const inserisce = puoInserire(profilo, registro)
   const cercaCommessa = filtri.commessa.trim() !== ''
-  const filtrato = cercaCommessa || filtri.impianto !== '' || filtri.esito !== ''
+  const filtrato = cercaCommessa || filtri.impianto !== '' || filtri.esito !== '' || filtri.dimensionale !== ''
 
   return (
     <>
-      {ricerca && <BarraFiltri filtri={filtri} impianti={impianti} onCambia={setFiltri} />}
+      {ricerca && <BarraFiltri registro={registro} filtri={filtri} impianti={impianti} onCambia={setFiltri} />}
       {errore && <p className="errore riquadro">{errore}</p>}
       {cercaCommessa && !caricamento && (
         <p className="nota-ricerca">
@@ -125,7 +125,7 @@ export default function SezioneRegistro({ registro, profilo, versione, ricerca, 
       ) : (
         <ElencoRecord
           record={record}
-          conNote={registro.conNote}
+          registro={registro}
           puoModificare={modificabile}
           onDettaglio={setDettaglio}
           onModifica={(r) => setModulo({ record: r })}

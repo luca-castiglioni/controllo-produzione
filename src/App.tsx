@@ -7,7 +7,7 @@ import MenuLaterale from './components/MenuLaterale'
 import PaginaImpianti from './components/PaginaImpianti'
 import PaginaOperatori from './components/PaginaOperatori'
 import SezioneRegistro from './components/SezioneRegistro'
-import { PAGINE_SERVIZIO, REGISTRO_TEST, REGISTRO_VALIDAZIONI, type PaginaServizio } from './config'
+import { PAGINE_SERVIZIO, REGISTRO_VERIFICA, REGISTRO_VALIDAZIONI, type PaginaServizio } from './config'
 import { caricaProfilo, supabase, supabaseConfigurato } from './supabase'
 import type { Operatore } from './types'
 
@@ -69,7 +69,7 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
     return () => clearTimeout(t)
   }, [messaggio])
 
-  const registro = sezione === 'test' ? REGISTRO_TEST : REGISTRO_VALIDAZIONI
+  const registro = sezione === 'test' ? REGISTRO_VERIFICA : REGISTRO_VALIDAZIONI
   const titolo = pagina ? PAGINE_SERVIZIO.find((p) => p.id === pagina)!.titolo : registro.titolo
 
   return (
@@ -121,7 +121,7 @@ function Principale({ profilo, email }: { profilo: Operatore; email: string }) {
         <nav className="schede-basso">
           <button className={sezione === 'test' ? 'attiva' : ''} onClick={() => setSezione('test')}>
             <Icona nome="occhio" />
-            TEST COLLA
+            VERIFICA
           </button>
           {/* gli operatori vedono le validazioni in sola lettura */}
           <button className={sezione === 'validazione' ? 'attiva' : ''} onClick={() => setSezione('validazione')}>

@@ -37,7 +37,9 @@ export default function ModuloRecord({ registro, record, profilo, impianti, onCh
   const [barcode, setBarcode] = useState<string | null>(record?.barcode ?? null)
   const [impianto, setImpianto] = useState(record?.impianto ?? leggiUltimoImpianto(profilo, impianti))
   const [data, setData] = useState(record?.data ?? oggi())
-  const [esito, setEsito] = useState<boolean | null>(record?.esito ?? null)
+  // con le spunte (Verifica) il valore iniziale è "non OK"; con i pulsanti va scelto
+  const [esito, setEsito] = useState<boolean | null>(record?.esito ?? (registro.esitoComeSpunta ? false : null))
+  const [verificaDimensionale, setVerificaDimensionale] = useState(record?.verifica_dimensionale ?? false)
   const [note, setNote] = useState(record?.note ?? '')
   const [controlloIncollaggio, setControlloIncollaggio] = useState(record?.controllo_incollaggio ?? false)
   const [errore, setErrore] = useState<string | null>(null)
@@ -71,7 +73,16 @@ export default function ModuloRecord({ registro, record, profilo, impianti, onCh
     try {
       await salvaRecord(
         registro,
-        { commessa: commessa.trim(), barcode, impianto, data, esito, note: note.trim() || null, controllo_incollaggio: controlloIncollaggio },
+        {
+          commessa: commessa.trim(),
+          barcode,
+          impianto,
+          data,
+          esito,
+          note: note.trim() || null,
+          controllo_incollaggio: controlloIncollaggio,
+          verifica_dimensionale: verificaDimensionale,
+        },
         record?.id,
       )
       try {
@@ -148,25 +159,45 @@ export default function ModuloRecord({ registro, record, profilo, impianti, onCh
           <input value={record ? (record.operatore?.nome ?? '') : profilo.nome} readOnly disabled />
         </label>
 
-        <div className="campo">
-          <span className="etichetta">{registro.etichettaEsito} *</span>
-          <div className="scelta-esito">
-            <button
-              type="button"
-              className={esito === false ? 'scelto no' : ''}
-              onClick={() => setEsito(false)}
-            >
-              NO
-            </button>
-            <button
-              type="button"
-              className={esito === true ? 'scelto ok' : ''}
-              onClick={() => setEsito(true)}
-            >
-              OK
-            </button>
+        {registro.esitoComeSpunta ? (
+          <div className="campo">
+            <span className="etichetta">Esito (spunta = OK)</span>
+            <label className="spunta">
+              <input type="checkbox" checked={esito === true} onChange={(e) => setEsito(e.target.checked)} />
+              {registro.etichettaEsito}
+            </label>
+            {registro.conVerificaDimensionale && (
+              <label className="spunta">
+                <input
+                  type="checkbox"
+                  checked={verificaDimensionale}
+                  onChange={(e) => setVerificaDimensionale(e.target.checked)}
+                />
+                Verifica dimensionale
+              </label>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="campo">
+            <span className="etichetta">{registro.etichettaEsito} *</span>
+            <div className="scelta-esito">
+              <button
+                type="button"
+                className={esito === false ? 'scelto no' : ''}
+                onClick={() => setEsito(false)}
+              >
+                NO
+              </button>
+              <button
+                type="button"
+                className={esito === true ? 'scelto ok' : ''}
+                onClick={() => setEsito(true)}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
 
         {registro.conControlloIncollaggio && (
           <label className="spunta">

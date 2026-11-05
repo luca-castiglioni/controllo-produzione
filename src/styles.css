@@ -472,7 +472,7 @@ img.logo { display: block; width: auto; height: 96px; background: none; border-r
 .icona-pulsante.attivo { background: var(--sfondo); color: var(--primario); }
 .barra-filtri { padding: 12px; margin-bottom: 8px; gap: 10px; }
 .barra-filtri input[type='search'] { font-size: 18px; }
-.riga-filtri { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.riga-filtri { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .scelta-filtro { display: flex; background: var(--bordo); border-radius: 10px; padding: 3px; }
 .scelta-filtro button {
   border: none;
@@ -493,3 +493,15 @@ img.logo { display: block; width: auto; height: 96px; background: none; border-r
   color: #1565c0;
   white-space: nowrap;
 }
+
+/* ---------- Esiti della sezione Verifica nell'elenco ---------- */
+.etichetta-esito {
+  font-size: 13px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.etichetta-esito.ok { background: #e8f5e9; color: var(--ok); }
+.etichetta-esito.no { background: #fdecea; color: var(--no); }
+.riga-basso { flex-wrap: wrap; row-gap: 4px; }

@@ -1,6 +1,6 @@
 # Controllo Produzione
 
-App da telefono per il reparto: **validazione commesse** e **test di incollaggio**.
+App da telefono per il reparto: **validazione commesse** e **verifiche** (test incollaggio e verifica dimensionale).
 
 | Parte | Cosa fa |
 |---|---|

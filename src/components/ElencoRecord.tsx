@@ -1,17 +1,18 @@
+import type { Registro } from '../config'
 import { formatDataBreve } from '../format'
 import type { RecordRegistro } from '../types'
 import Icona from './Icone'
 
 interface Props {
   record: RecordRegistro[]
-  conNote: boolean
+  registro: Registro
   puoModificare: (r: RecordRegistro) => boolean
   onDettaglio: (r: RecordRegistro) => void
   onModifica: (r: RecordRegistro) => void
   onElimina: (r: RecordRegistro) => void
 }
 
-export default function ElencoRecord({ record, conNote, puoModificare, onDettaglio, onModifica, onElimina }: Props) {
+export default function ElencoRecord({ record, registro, puoModificare, onDettaglio, onModifica, onElimina }: Props) {
   // raggruppa per data (l'elenco arriva già ordinato dal più recente)
   const gruppi: [string, RecordRegistro[]][] = []
   for (const r of record) {
@@ -36,9 +37,18 @@ export default function ElencoRecord({ record, conNote, puoModificare, onDettagl
                       <span className="impianto">{r.impianto}</span>
                     </span>
                     <span className="riga-basso">
-                      <span className={`esito ${r.esito ? 'ok' : 'no'}`}>{r.esito ? 'OK' : 'NO'}</span>
+                      {registro.esitoComeSpunta ? (
+                        <>
+                          <EtichettaEsito testo={registro.etichettaBreveEsito} ok={r.esito} />
+                          {registro.conVerificaDimensionale && (
+                            <EtichettaEsito testo="Dimensionale" ok={Boolean(r.verifica_dimensionale)} />
+                          )}
+                        </>
+                      ) : (
+                        <span className={`esito ${r.esito ? 'ok' : 'no'}`}>{r.esito ? 'OK' : 'NO'}</span>
+                      )}
                       {r.controllo_incollaggio && <span className="etichetta-flag">Controllo incollaggio</span>}
-                      {conNote && r.note && <span className="note-breve">{r.note}</span>}
+                      {registro.conNote && r.note && <span className="note-breve">{r.note}</span>}
                     </span>
                     <small className="autore">{r.operatore?.nome}</small>
                   </button>
@@ -64,5 +74,14 @@ export default function ElencoRecord({ record, conNote, puoModificare, onDettagl
         </section>
       ))}
     </div>
+  )
+}
+
+// es. "Incollaggio OK" in verde, "Dimensionale NO" in rosso
+function EtichettaEsito({ testo, ok }: { testo: string; ok: boolean }) {
+  return (
+    <span className={`etichetta-esito ${ok ? 'ok' : 'no'}`}>
+      {testo} {ok ? 'OK' : 'NO'}
+    </span>
   )
 }

@@ -1,7 +1,7 @@
 # Controllo Produzione
 
 Web app mobile (PWA, usata da smartphone in reparto) per la **validazione commesse** e i
-**test di incollaggio**. Sostituisce un prototipo AppSheet. L'utente (Luca) è alle prime
+**verifiche** in produzione (test incollaggio e verifica dimensionale). Sostituisce un prototipo AppSheet. L'utente (Luca) è alle prime
 armi: spiega le modifiche in italiano, in modo semplice, un passo alla volta.
 La specifica completa è stata fornita nella prima conversazione; le regole chiave sono qui.
 
@@ -30,8 +30,11 @@ La specifica completa è stata fornita nella prima conversazione; le regole chia
 
 ## Regole di dominio
 - Ruoli: `operatore`, `capo_reparto`, `admin` (vedi commento in testa alla prima migrazione).
-- Operatore: vede/inserisce test; modifica/elimina i propri solo nel giorno di inserimento.
-  Vede le validazioni in sola lettura (scheda visibile, niente +); nel modulo test un avviso
+- Sezione **Verifica** (ex "Test colla"; tabella `test_incollaggio`, nomi interni invariati): due spunte,
+  `esito` = Test incollaggio OK e `verifica_dimensionale` = Verifica dimensionale OK (default false).
+  Nell'elenco due etichette colorate; filtri separati per le due spunte.
+- Operatore: vede/inserisce verifiche; modifica/elimina le proprie solo nel giorno di inserimento.
+  Vede le validazioni in sola lettura (scheda visibile, niente +); nel modulo verifica un avviso
   sotto la commessa dice se è già validata. Capo reparto: tutto sui dati, gestisce impianti e
   operatori normali. Admin: tutto, unico a gestire capi reparto/admin e ruoli.
 - `operatore_id` e `ora` dei record li imposta il database (trigger), mai il client.
